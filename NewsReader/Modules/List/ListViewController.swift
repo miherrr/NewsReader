@@ -23,6 +23,8 @@ class ListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(ListItemTableViewCell.nibName, forCellReuseIdentifier: ListItemTableViewCell.reuseIdentifier)
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 60
     }
     
     private func loadNews(search q: String) {
@@ -89,6 +91,7 @@ extension ListViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         let data = dataSource[indexPath.row]
+        cell.unread = !data.seen
         cell.title = data.title
         cell.url = data.imageUrl
         return cell
@@ -98,6 +101,11 @@ extension ListViewController: UITableViewDataSource {
 extension ListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let item = dataSource[indexPath.row]
+        let realm = try! Realm()
+        try! realm.write {
+            item.seen = true
+        }
+        tableView.reloadRows(at: [indexPath], with: .automatic)
         performSegue(withIdentifier: "details", sender: item)
     }
 }
